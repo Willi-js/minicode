@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@types/node": "^25.0.6",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "name": "minicode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.ts",
+  "devDependencies": {},
+  "scripts": {
+    "start": "tsx ./main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Willi-js/minicode.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Willi-js/minicode/issues"
+  },
+  "homepage": "https://github.com/Willi-js/minicode#readme"
+}
