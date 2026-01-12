@@ -24,7 +24,11 @@ enum Tokens {
 
     PIPE,
 
-    COMMENT
+    COMMENT,
+
+    USER_DEFINED_IDENTIFIER
 }
+
+export const skipableToken = ["", " ", "\n", "\r"];
 
 export default Tokens;
