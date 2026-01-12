@@ -1,1 +1,21 @@
-let test = "hi";
+func main(string_to_display) {
+    string_to_display >> out;
+}
+
+func generate_string() {
+    let rand = lib.random(1, 5);
+
+    if(rand == 1) {
+        ret "Hello World";
+    } elif(rand == 2) {
+        ret "Goodbye World";
+    } elif(rand == 3) {
+        ret "No comment";
+    } elif(rand == 4) {
+        ret == "This is a message";
+    } elif(rand == 5) {
+        ret == "Last resort";
+    }
+}
+
+generate_string() >> main();
