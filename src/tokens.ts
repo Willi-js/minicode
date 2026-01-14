@@ -12,6 +12,9 @@ enum Tokens {
     MINUS,
     MULTI,
     DEV,
+    EQUAL,
+
+    QOUTE,
 
     LEFT_BRACE,
     RIGHT_BRACE,
@@ -26,7 +29,12 @@ enum Tokens {
 
     COMMENT,
 
-    USER_DEFINED_IDENTIFIER
+    USER_DEFINED_IDENTIFIER,
+
+    STRING,
+    NUMBER,
+
+    
 }
 
 export const skipableToken = ["", " ", "\n", "\r"];

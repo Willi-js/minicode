@@ -16,4 +16,6 @@ fs.readFile(path.join(process.cwd(), file), (err, data) => {
 
     lex.tokenize();
 
+    console.log(lex.getLexed());
+
 });
