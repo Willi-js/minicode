@@ -1,21 +1,24 @@
 import path from "path";
 import fs from "fs";
 import Lexer from "./src/Lexer";
+import Parser from "./src/Parser";
 
 let file = process.argv[2];
 if(!file) file = "main.mini";
 
-fs.readFile(path.join(process.cwd(), file), (err, data) => {
+const file_path = path.join(process.cwd(), file);
+
+fs.readFile(file_path, (err, data) => {
     if(err) {
         throw err.message;
     }
 
     const input = data.toString();
 
-    const lex = new Lexer(input);
+    const parsed_file = path.parse(file_path);
 
-    lex.tokenize();
+    const lex = new Lexer(input, file_path).tokenize();
 
-    console.log(lex.getLexed());
+    const par = new Parser(lex.getLexed()).parse();
 
 });

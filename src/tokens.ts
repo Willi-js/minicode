@@ -34,8 +34,21 @@ enum Tokens {
     STRING,
     NUMBER,
 
-    
 }
+
+enum Expressions {
+
+    VARIABLE_DECLARATION,
+    FUNCTION_CALL,
+    FUNCTION_DEFINITION,
+    IF_STATEMENT,
+    FOR_STATEMENT,
+    RETURN_STATEMENT,
+    PIPE
+
+}
+
+export { Expressions };
 
 export const skipableToken = ["", " ", "\n", "\r"];
 

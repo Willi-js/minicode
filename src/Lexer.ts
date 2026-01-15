@@ -1,4 +1,5 @@
 import Tokens, { skipableToken } from "./tokens";
+import { log } from "./utils";
 
 export type Constructs = {
     type: Tokens;
@@ -9,9 +10,11 @@ export default class Lexer {
 
     public input: string = "";
     public constructs: Constructs[] = [];
+    public file_name: string = "";
 
-    constructor(input: string) {
+    constructor(input: string, file_name: string) {
         this.input = input;
+        this.file_name = file_name;
     }
 
     private isLetter(char: string): boolean {
@@ -137,7 +140,7 @@ export default class Lexer {
         this.constructs.push({ type, value: token });
     }
 
-    public tokenize() {
+    public tokenize(): Lexer {
         let buildable = "";
         let lastBuildableType: "str" | "num" | null = null;
         
@@ -181,7 +184,11 @@ export default class Lexer {
             }
         }
 
+        log("success", "tokenized", this.file_name);
+
         this.finilize();
+
+        return this;
     }
 
     private finilize() {
@@ -226,6 +233,7 @@ export default class Lexer {
 
         this.constructs = finalized;
 
+        log("success", "finilized", this.file_name);
     }
 
     public getLexed() {
