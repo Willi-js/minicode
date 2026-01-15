@@ -10,14 +10,20 @@ type Expression = {
 export default class Parser {
     
     private input: Constructs[];
+
+    private file_name: string = "";
     
-    constructor(input: Constructs[]) {
+    constructor(input: Constructs[], file_name: string) {
+
+        this.file_name = file_name;
 
         this.input = input;
 
     }
 
     public parse(): Parser {
+
+        log("info", "Parsing...", this.file_name);
 
         const expressions = []
 

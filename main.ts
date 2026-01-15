@@ -19,6 +19,6 @@ fs.readFile(file_path, (err, data) => {
 
     const lex = new Lexer(input, file_path).tokenize();
 
-    const par = new Parser(lex.getLexed()).parse();
+    const par = new Parser(lex.getLexed(), file_path).parse();
 
 });

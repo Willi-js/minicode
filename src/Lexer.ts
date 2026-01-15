@@ -141,6 +141,9 @@ export default class Lexer {
     }
 
     public tokenize(): Lexer {
+
+        log("info", "Tokenizing...", this.file_name);
+
         let buildable = "";
         let lastBuildableType: "str" | "num" | null = null;
         
@@ -192,6 +195,8 @@ export default class Lexer {
     }
 
     private finilize() {
+
+        log("info", "Finilizing...", this.file_name);
         
         let finalized: Constructs[] = [];
 
