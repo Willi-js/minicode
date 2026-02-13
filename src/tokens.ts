@@ -48,6 +48,8 @@ enum Expressions {
     FOR_STATEMENT,
     RETURN_STATEMENT,
     PIPE,
+    STRING,
+    MATH_EXPRESSION,
 
     ERROR
 

@@ -4,7 +4,7 @@ import { log } from "./utils";
 
 type Expression = {
     type: Expressions;
-    value: Constructs[] | Expression[]
+    value: Array<Expression | Constructs>
 }
 
 export default class Parser {
@@ -28,7 +28,7 @@ export default class Parser {
         const expressions: Expression[] = [];
 
         let expression: Constructs[] = [];
-        let currentExpressionType: Expressions | null = null;
+        let currentExpressionType: [Expressions, Array<Expression | Constructs>] | null = null;
 
         while(this.input.length > 0) {
 
@@ -39,7 +39,7 @@ export default class Parser {
                 currentExpressionType = this.analyzeExpression(expression);
 
                 if(expression.length > 0) {
-                    expressions.push({ type: currentExpressionType, value: expression });
+                    expressions.push({ type: currentExpressionType[0], value: currentExpressionType[1] });
                 }
 
                 expression = [];
@@ -57,12 +57,53 @@ export default class Parser {
 
     }
 
-    private analyzeExpression(expression: Constructs[]): Expressions {
+    private analyzeExpression(expression: Constructs[]): [Expressions, Array<Expression | Constructs>] {
 
-        if(expression[0].type === Tokens.LET) {
-            
+        switch (expression[0].type) {
+            case Tokens.LET: {
+                if(expression[1].type !== Tokens.USER_DEFINED_IDENTIFIER) this.error("Expected UDI after let, found \"" + expression[1].value + "\" in " + this.file_name);
+                if(expression[2].type !== Tokens.ASSIGN) this.error("Expected \"=\" after UDI in LET expression, found \"" + expression[2].value + "\" in " + this.file_name);
+
+                const value = this.analyzeExpression(expression.slice(3));
+
+                if(value[0] === Expressions.ERROR || (value[0] !== Expressions.STRING && value[0] !== Expressions.MATH_EXPRESSION)) this.error("Expected expression after \"=\" in LET expression, found \"" + expression.slice(3).join(" ") + "\" in " + this.file_name);
+                
+                return [Expressions.VARIABLE_DECLARATION, value[1]];
+            }
+            case Tokens.STRING: {
+                if(expression.length === 1) {
+                    return [Expressions.STRING, expression];
+                }
+
+                return [Expressions.ERROR, []];
+            }
+
+            case Tokens.NUMBER: {
+                if(expression[expression.length-1].type !== Tokens.NUMBER) [Expressions.ERROR, []];
+                
+                let operatorActive: boolean = false;
+                
+                for(let i = 1; i < expression.length-1; i++) {
+                    if(expression[i].type !== Tokens.PLUS && expression[i].type !== Tokens.MINUS && expression[i].type !== Tokens.MULTI && expression[i].type !== Tokens.DEV && expression[i].type !== Tokens.NUMBER) {
+                        return [Expressions.ERROR, []];
+                    }
+
+                    if(expression[i].type === Tokens.PLUS || expression[i].type === Tokens.MINUS || expression[i].type === Tokens.MULTI || expression[i].type === Tokens.DEV) {
+                        if(operatorActive) [Expressions.ERROR, []];
+                        operatorActive = true;
+                    } else {
+                        operatorActive = false;
+                    }
+                }
+                return [Expressions.MATH_EXPRESSION, expression];
+            }
         }
 
-        return Expressions.ERROR;
+        return [Expressions.ERROR, []];
+    }
+
+    private error(message: string) {
+        log("error", message);
+        process.exit(1);
     }
 }
