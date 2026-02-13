@@ -2,14 +2,9 @@ import { Constructs } from "./Lexer";
 import Tokens, { Expressions } from "./tokens";
 import { log } from "./utils";
 
-type Expression = {
-    type: Expressions;
-    value: Array<Expression | Constructs>
-}
-
 type ExpressionDeclaration = {
     type: Expressions,
-    value: Array<Constructs | Expression>
+    value: Array<Constructs | ExpressionDeclaration> | string,
     data: {
         [key: string]: any
     }
@@ -97,7 +92,7 @@ export default class Parser {
                 
                 const out: ExpressionDeclaration = {
                     type: Expressions.VARIABLE_DECLARATION,
-                    value: value.value,
+                    value: [value],
                     data: {
                         "reference": expression[1].value 
                     }
@@ -105,12 +100,13 @@ export default class Parser {
 
                 return out;
             }
+
             case Tokens.STRING: {
                 if(expression.length === 1) {
 
                     const out: ExpressionDeclaration = {
                         type: Expressions.STRING,
-                        value: expression,
+                        value: expression[0].value,
                         data: {}
                     }
 
