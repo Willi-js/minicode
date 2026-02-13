@@ -12,9 +12,11 @@ enum Tokens {
     MINUS,
     MULTI,
     DEV,
-    EQUAL,
+    ASSIGN,
 
     QOUTE,
+
+    SEMICOLON,
 
     LEFT_BRACE,
     RIGHT_BRACE,
@@ -24,6 +26,7 @@ enum Tokens {
 
     MORE,
     LESS,
+    EQUAL,
 
     PIPE,
 
@@ -44,7 +47,9 @@ enum Expressions {
     IF_STATEMENT,
     FOR_STATEMENT,
     RETURN_STATEMENT,
-    PIPE
+    PIPE,
+
+    ERROR
 
 }
 

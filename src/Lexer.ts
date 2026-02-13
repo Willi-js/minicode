@@ -122,11 +122,15 @@ export default class Lexer {
             }
 
             case "=": {
-                return Tokens.EQUAL;
+                return Tokens.ASSIGN;
             }
 
             case '"': {
                 return Tokens.QOUTE;
+            }
+
+            case ";": {
+                return Tokens.SEMICOLON;
             }
 
             default: {
@@ -213,6 +217,12 @@ export default class Lexer {
             if(cur.type === Tokens.DEV && this.constructs[0]?.type === Tokens.DEV) {
                 this.constructs.shift();
                 finalized.push({ type: Tokens.COMMENT, value: "//" });
+                continue;
+            }
+
+            if(cur.type === Tokens.ASSIGN && this.constructs[0]?.type === Tokens.ASSIGN) {
+                this.constructs.shift();
+                finalized.push({ type: Tokens.EQUAL, value: "==" });
                 continue;
             }
 

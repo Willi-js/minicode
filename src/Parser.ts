@@ -3,7 +3,7 @@ import Tokens, { Expressions } from "./tokens";
 import { log } from "./utils";
 
 type Expression = {
-    type: Expression;
+    type: Expressions;
     value: Constructs[] | Expression[]
 }
 
@@ -25,14 +25,44 @@ export default class Parser {
 
         log("info", "Parsing...", this.file_name);
 
-        const expressions = []
+        const expressions: Expression[] = [];
+
+        let expression: Constructs[] = [];
+        let currentExpressionType: Expressions | null = null;
 
         while(this.input.length > 0) {
+
             const cur = this.input.shift();
+
+            if(cur?.type === Tokens.SEMICOLON) {
+                
+                currentExpressionType = this.analyzeExpression(expression);
+
+                if(expression.length > 0) {
+                    expressions.push({ type: currentExpressionType, value: expression });
+                }
+
+                expression = [];
+                currentExpressionType = null;
+                continue;
+            }
+
+            if(!cur) continue;
+
+            expression.push(cur);
             
         }
 
         return this;
 
+    }
+
+    private analyzeExpression(expression: Constructs[]): Expressions {
+
+        if(expression[0].type === Tokens.LET) {
+            
+        }
+
+        return Expressions.ERROR;
     }
 }

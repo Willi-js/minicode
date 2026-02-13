@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import Lexer from "./src/Lexer";
 import Parser from "./src/Parser";
+import { log } from "./src/utils";
 
 let file = process.argv[2];
 if(!file) file = "main.mini";
@@ -10,7 +11,8 @@ const file_path = path.join(process.cwd(), file);
 
 fs.readFile(file_path, (err, data) => {
     if(err) {
-        throw err.message;
+        log("error", err.message);
+        process.exit(1);
     }
 
     const input = data.toString();
