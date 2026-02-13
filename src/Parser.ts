@@ -7,13 +7,21 @@ type Expression = {
     value: Array<Expression | Constructs>
 }
 
+type ExpressionDeclaration = {
+    type: Expressions,
+    value: Array<Constructs | Expression>
+    data: {
+        [key: string]: any
+    }
+}
+
 export default class Parser {
     
     private input: Constructs[];
 
     private file_name: string = "";
 
-    public expressions: Expression[] = [];
+    public expressions: ExpressionDeclaration[] = [];
     
     constructor(input: Constructs[], file_name: string) {
 
@@ -28,7 +36,7 @@ export default class Parser {
         log("info", "Parsing...", this.file_name);
 
         let expression: Constructs[] = [];
-        let currentExpressionType: [Expressions, Array<Expression | Constructs>] | null = null;
+        let currentExpressionType: ExpressionDeclaration | null = null;
 
         while(this.input.length > 0) {
 
@@ -39,7 +47,7 @@ export default class Parser {
                 currentExpressionType = this.analyzeExpression(expression);
 
                 if(expression.length > 0) {
-                    this.expressions.push({ type: currentExpressionType[0], value: currentExpressionType[1] });
+                    this.expressions.push(currentExpressionType);
                 }
 
                 expression = [];
@@ -68,7 +76,15 @@ export default class Parser {
         return string;
     }
 
-    private analyzeExpression(expression: Constructs[]): [Expressions, Array<Expression | Constructs>] {
+    private analyzeExpression(expression: Constructs[]): ExpressionDeclaration {
+
+        const error = {
+            type: Expressions.ERROR,
+            value: [],
+            data: {
+                "message": ""
+            }
+        };
 
         switch (expression[0].type) {
             case Tokens.LET: {
@@ -77,40 +93,72 @@ export default class Parser {
 
                 const value = this.analyzeExpression(expression.slice(3));
 
-                if(value[0] === Expressions.ERROR || (value[0] !== Expressions.STRING && value[0] !== Expressions.MATH_EXPRESSION)) this.error("Expected a valid expression or value after \"=\" in LET expression, found \"" + this.structureValues(expression.slice(3)) + "\" in " + this.file_name);
+                if(value.type === Expressions.ERROR || (value.type !== Expressions.STRING && value.type !== Expressions.MATH_EXPRESSION)) this.error(value.data["message"] + " in " + this.file_name);
                 
-                return [Expressions.VARIABLE_DECLARATION, value[1]];
+                const out: ExpressionDeclaration = {
+                    type: Expressions.VARIABLE_DECLARATION,
+                    value: value.value,
+                    data: {
+                        "reference": expression[1].value 
+                    }
+                }
+
+                return out;
             }
             case Tokens.STRING: {
                 if(expression.length === 1) {
-                    return [Expressions.STRING, expression];
+
+                    const out: ExpressionDeclaration = {
+                        type: Expressions.STRING,
+                        value: expression,
+                        data: {}
+                    }
+
+                    return out;
                 }
 
-                return [Expressions.ERROR, []];
+                error.data["message"] = "Invalid string expression: " + this.structureValues(expression);
+
+                return error;
             }
 
             case Tokens.NUMBER: {
-                if(expression[expression.length-1].type !== Tokens.NUMBER) return [Expressions.ERROR, []];
+                if(expression[expression.length-1].type !== Tokens.NUMBER) return error;
                 
                 let operatorActive: boolean = false;
                 
                 for(let i = 1; i < expression.length-1; i++) {
                     if(expression[i].type !== Tokens.PLUS && expression[i].type !== Tokens.MINUS && expression[i].type !== Tokens.MULTI && expression[i].type !== Tokens.DEV && expression[i].type !== Tokens.NUMBER) {
-                        return [Expressions.ERROR, []];
+                        
+                        error.data["message"] = "Invalid math expression: " + this.structureValues(expression);
+
+                        return error;
                     }
 
                     if(expression[i].type === Tokens.PLUS || expression[i].type === Tokens.MINUS || expression[i].type === Tokens.MULTI || expression[i].type === Tokens.DEV) {
-                        if(operatorActive) return [Expressions.ERROR, []];
+                        
+                        error.data["message"] = "Invalid math expression: " + this.structureValues(expression);
+                        if(operatorActive) return error;
+
                         operatorActive = true;
                     } else {
                         operatorActive = false;
                     }
                 }
-                return [Expressions.MATH_EXPRESSION, expression];
+
+                const out: ExpressionDeclaration = {
+                    type: Expressions.MATH_EXPRESSION,
+                    value: expression,
+                    data: {}
+                }
+
+                return out;
             }
         }
 
-        return [Expressions.ERROR, []];
+        error.data["message"] = "Invalid expression: " + this.structureValues(expression);
+
+        return error;
     }
 
     private error(message: string) {
