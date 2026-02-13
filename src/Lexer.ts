@@ -229,7 +229,13 @@ export default class Lexer {
             if(cur.type === Tokens.QOUTE) {
                 let str = "";
                 while(this.constructs[0]?.type !== Tokens.QOUTE) {
-                    str += this.constructs.shift()?.value;
+                    if(str.length === 0) {
+                        str += this.constructs.shift()?.value;
+                        continue;
+                    }
+
+                    str += " " + this.constructs.shift()?.value;
+                    
                 }
                 this.constructs.shift();
                 finalized.push({ type: Tokens.STRING, value: str });

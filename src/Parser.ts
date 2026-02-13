@@ -12,6 +12,8 @@ export default class Parser {
     private input: Constructs[];
 
     private file_name: string = "";
+
+    public expressions: Expression[] = [];
     
     constructor(input: Constructs[], file_name: string) {
 
@@ -25,8 +27,6 @@ export default class Parser {
 
         log("info", "Parsing...", this.file_name);
 
-        const expressions: Expression[] = [];
-
         let expression: Constructs[] = [];
         let currentExpressionType: [Expressions, Array<Expression | Constructs>] | null = null;
 
@@ -39,7 +39,7 @@ export default class Parser {
                 currentExpressionType = this.analyzeExpression(expression);
 
                 if(expression.length > 0) {
-                    expressions.push({ type: currentExpressionType[0], value: currentExpressionType[1] });
+                    this.expressions.push({ type: currentExpressionType[0], value: currentExpressionType[1] });
                 }
 
                 expression = [];
@@ -57,6 +57,17 @@ export default class Parser {
 
     }
 
+    private structureValues(values: Constructs[]): string {
+        
+        let string = "";
+        
+        for(let i = 0; i < values.length; i++) {
+            string += values[i].value;
+        }
+
+        return string;
+    }
+
     private analyzeExpression(expression: Constructs[]): [Expressions, Array<Expression | Constructs>] {
 
         switch (expression[0].type) {
@@ -66,7 +77,7 @@ export default class Parser {
 
                 const value = this.analyzeExpression(expression.slice(3));
 
-                if(value[0] === Expressions.ERROR || (value[0] !== Expressions.STRING && value[0] !== Expressions.MATH_EXPRESSION)) this.error("Expected expression after \"=\" in LET expression, found \"" + expression.slice(3).join(" ") + "\" in " + this.file_name);
+                if(value[0] === Expressions.ERROR || (value[0] !== Expressions.STRING && value[0] !== Expressions.MATH_EXPRESSION)) this.error("Expected a valid expression or value after \"=\" in LET expression, found \"" + this.structureValues(expression.slice(3)) + "\" in " + this.file_name);
                 
                 return [Expressions.VARIABLE_DECLARATION, value[1]];
             }
@@ -79,7 +90,7 @@ export default class Parser {
             }
 
             case Tokens.NUMBER: {
-                if(expression[expression.length-1].type !== Tokens.NUMBER) [Expressions.ERROR, []];
+                if(expression[expression.length-1].type !== Tokens.NUMBER) return [Expressions.ERROR, []];
                 
                 let operatorActive: boolean = false;
                 
@@ -89,7 +100,7 @@ export default class Parser {
                     }
 
                     if(expression[i].type === Tokens.PLUS || expression[i].type === Tokens.MINUS || expression[i].type === Tokens.MULTI || expression[i].type === Tokens.DEV) {
-                        if(operatorActive) [Expressions.ERROR, []];
+                        if(operatorActive) return [Expressions.ERROR, []];
                         operatorActive = true;
                     } else {
                         operatorActive = false;

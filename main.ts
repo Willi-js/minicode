@@ -23,4 +23,6 @@ fs.readFile(file_path, (err, data) => {
 
     const par = new Parser(lex.getLexed(), file_path).parse();
 
+    log("info", "\n", JSON.stringify(par.expressions, null, 2));
+
 });
