@@ -59,7 +59,6 @@ export default class Parser {
                     }
                 }
 
-                
                 if(blocks.length === 0) {
                     error.data["message"] = "Unexpected closing brace, found \"" + cur.value + "\" in " + this.file_name;
                     this.error(error.data["message"]);
@@ -90,6 +89,24 @@ export default class Parser {
 
                 (blocks[blocks.length - 1].value as ExpressionDeclaration[]).push(block);
 
+                continue;
+
+            }
+
+            if(cur.type === Tokens.RIGHT_BRACE) {
+
+                expression.push(cur);
+
+                currentExpressionType = this.analyzeExpression(expression);
+
+                if(expression.length > 0) {
+                    if(blocks.length > 0) {
+                        (blocks[blocks.length - 1].value as ExpressionDeclaration[]).push(currentExpressionType);
+                    } else this.expressions.push(currentExpressionType);
+                }
+
+                expression = [];
+                currentExpressionType = null;
                 continue;
 
             }
@@ -214,9 +231,35 @@ export default class Parser {
 
                 return out;
             }
+
+            case Tokens.FUNC: {
+                if(expression[1].type !== Tokens.USER_DEFINED_IDENTIFIER) this.error("Expected UDI after func, found \"" + expression[1].value + "\" in " + this.file_name);
+                if(expression[2].type !== Tokens.LEFT_BRACE) this.error("Expected \"(\" after UDI in func expression, found \"" + expression[2].value + "\" in " + this.file_name);
+                if(expression[expression.length-1].type !== Tokens.RIGHT_BRACE) this.error("Expected \")\" after UDI in func expression, found \"" + expression[expression.length-1].value + "\" in " + this.file_name);
+
+                const functionArguments = expression.slice(3, expression.length-1);
+
+                for(let i = 0; i < functionArguments.length; i++) {
+                    if(functionArguments[i].type !== Tokens.USER_DEFINED_IDENTIFIER) this.error("Expected UDI in function arguments, found \"" + functionArguments[i].value + "\" in " + this.file_name);
+                }
+
+                const out: ExpressionDeclaration = {
+                    type: Expressions.FUNCTION_DECLARATION,
+                    value: [],
+                    data: {
+                        "reference": expression[1].value,
+                        "arguments": functionArguments
+                    }
+                }
+
+                return out;
+            }
+
         }
 
         error.data["message"] = "Invalid expression: " + "'" + this.structureValues(expression) + "'";
+
+        this.error(error.data["message"]);
 
         return error;
     }
