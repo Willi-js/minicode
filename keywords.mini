@@ -1,4 +1,4 @@
-func
+func +
 let +
 ret
 if
@@ -13,4 +13,5 @@ for
 {}
 <
 >
+==
 >>

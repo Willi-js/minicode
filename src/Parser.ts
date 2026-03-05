@@ -255,6 +255,20 @@ export default class Parser {
                 return out;
             }
 
+            case Tokens.USER_DEFINED_IDENTIFIER: {
+                break;
+            }
+
+            case Tokens.IF: {
+                if(expression[1].type !== Tokens.LEFT_BRACE) this.error("Expected \"(\" after if, found \"" + expression[1].value + "\" in " + this.file_name);
+                if(expression[expression.length-1].type !== Tokens.RIGHT_BRACE) this.error("Expected \")\" after if, found \"" + expression[expression.length-1].value + "\" in " + this.file_name);
+
+                const condition = this.analyzeExpression(expression.slice(2, expression.length-1));
+
+                if(condition.type === Expressions.ERROR || condition.type !== Expressions.STATEFUL_EXPRESSION) this.error((condition.data["message"] || "Invalid condition expression:") + " in " + this.file_name);
+
+            }
+
         }
 
         error.data["message"] = "Invalid expression: " + "'" + this.structureValues(expression) + "'";
